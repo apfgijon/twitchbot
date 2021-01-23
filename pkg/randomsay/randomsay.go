@@ -6,10 +6,10 @@ import (
 	"math/rand"
 )
 
-const file = "frases.json"
+const phrasefile = "frases.json"
 
 func GetRandomPhrase() string {
-	phrasesRaw, err := ioutil.ReadFile(file)
+	phrasesRaw, err := ioutil.ReadFile(phrasefile)
 	if err != nil {
 		return ""
 	}
@@ -23,7 +23,7 @@ func GetRandomPhrase() string {
 }
 
 func SetPhrase(frase string) {
-	phrasesRaw, err := ioutil.ReadFile(file)
+	phrasesRaw, err := ioutil.ReadFile(phrasefile)
 	if err != nil {
 		return
 	}
@@ -38,5 +38,5 @@ func SetPhrase(frase string) {
 		return
 	}
 
-	ioutil.WriteFile(file, phrasesRaw, 0644)
+	ioutil.WriteFile(phrasefile, phrasesRaw, 0644)
 }

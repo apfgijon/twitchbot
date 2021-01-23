@@ -14,3 +14,10 @@ func (gn *Generalbot) sayRandomPhrase() {
 		time.Sleep(timeToWait)
 	}
 }
+
+func (gn *Generalbot) sayRandomRefran() {
+	for {
+		gn.Com.Client.Say(gn.Com.Channel, randomsay.GetRandomRefran())
+		time.Sleep(timeToWait)
+	}
+}

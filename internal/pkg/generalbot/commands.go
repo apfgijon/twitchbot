@@ -30,6 +30,15 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 		message := "Nah un putu tryhard de la de dios"
 		gn.Com.Client.Say(gn.Com.Channel, message)
 		break
+	case "!skill":
+		message := "https://clips.twitch.tv/BloodyColdbloodedShrewNotATK"
+		gn.Com.Client.Say(gn.Com.Channel, message)
+		break
+		// case "!alexa":
+		// 	number := alexa.GetNumber()
+		// 	message := "Caloto ha discutido con alexa " + strconv.Itoa(number) + " veces en stream"
+		// 	gn.Com.Client.Say(gn.Com.Channel, message)
+		// 	break
 	}
 
 	completeCommand := strings.Split(message.Message, " ")
@@ -51,6 +60,10 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 			gn.Com.Client.Say(gn.Com.Channel, resp)
 			break
 		case "!covid":
+			// if time.Now().Weekday() == 0 || time.Now().Weekday() == 5 || time.Now().Weekday() == 6 {
+			// 	gn.Com.Client.Say(gn.Com.Channel, message.User.DisplayName+", nun hai datos güei")
+			// 	return true
+			// }
 			transalatedresp := covid.Translate(args)
 			if transalatedresp != "" {
 				resp := covid.GetCovidCasesForProvince(transalatedresp)
@@ -70,6 +83,8 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 				return true
 
 			}
+			formattedMessage := "Nun sei " + message.User.DisplayName + ", abondo que poño casos d'españa"
+			gn.Com.Client.Say(gn.Com.Channel, formattedMessage)
 			break
 		default:
 			return false

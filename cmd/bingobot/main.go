@@ -28,6 +28,5 @@ func main() {
 	}
 
 	twitchbot.Start(bot_name, channel, oauth)
-
 	//riddle.StartClient(bot_name, channel, oauth)
 }
