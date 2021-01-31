@@ -6,7 +6,7 @@ import (
 	"github.com/apfgijon/cartones/pkg/randomsay"
 )
 
-const timeToWait = time.Minute * 5
+const timeToWait = time.Minute * 3
 
 func (gn *Generalbot) sayRandomPhrase() {
 	for {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/apfgijon/cartones/internal/twitchbot"
+	"github.com/mtslzr/pokeapi-go"
 )
 
 func main() {
@@ -26,6 +27,8 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+
+	pokeapi.CacheSettings.CustomExpire = 1000000000000000
 
 	twitchbot.Start(bot_name, channel, oauth)
 	//riddle.StartClient(bot_name, channel, oauth)

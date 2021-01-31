@@ -1,13 +1,16 @@
 package generalbot
 
 import (
+	"math/rand"
 	"strconv"
 	"strings"
 
 	"github.com/apfgijon/cartones/internal/pkg/municipios"
+	"github.com/apfgijon/cartones/internal/pkg/pokemon"
 	"github.com/apfgijon/cartones/pkg/cartongen"
 	"github.com/apfgijon/cartones/pkg/covid"
 	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/mtslzr/pokeapi-go"
 )
 
 func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
@@ -24,6 +27,16 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 		break
 	case "!gonzalo":
 		message := "shhhh nun fales de \"E LOGO\""
+		gn.Com.Client.Say(gn.Com.Channel, message)
+		break
+	case "!pokemon":
+		l, _ := pokeapi.Resource("pokemon", 0, 386)
+		RandomPoke := l.Results[rand.Intn(len(l.Results))]
+		response := message.User.DisplayName + " tiene la personalidad de " + RandomPoke.Name
+		gn.Com.Client.Say(gn.Com.Channel, response)
+		break
+	case "!muertos":
+		message := "Rython(Haz_A), Zigzagoon(JavvyoYT), Tyrogue(Yajuli) y Shelgon(Mr Socone) :("
 		gn.Com.Client.Say(gn.Com.Channel, message)
 		break
 	case "!javi":
@@ -59,6 +72,22 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 			resp := municipios.QueVer(args)
 			gn.Com.Client.Say(gn.Com.Channel, resp)
 			break
+		case "!ataques":
+			go ataques(gn, args)
+			break
+		case "!comoes":
+			p, _ := pokeapi.Pokemon(strings.ToLower(args))
+			resp := p.Sprites.FrontDefault
+			gn.Com.Client.Say(gn.Com.Channel, resp)
+			break
+		case "!comoesshiny":
+			p, _ := pokeapi.Pokemon(strings.ToLower(args))
+			resp := p.Sprites.FrontShiny
+			gn.Com.Client.Say(gn.Com.Channel, resp)
+			break
+		case "!tipo":
+			go tipos(gn, args)
+			break
 		case "!covid":
 			// if time.Now().Weekday() == 0 || time.Now().Weekday() == 5 || time.Now().Weekday() == 6 {
 			// 	gn.Com.Client.Say(gn.Com.Channel, message.User.DisplayName+", nun hai datos güei")
@@ -93,4 +122,32 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 	}
 
 	return false
+}
+
+func ataques(gn *Generalbot, args string) {
+	p, _ := pokeapi.Pokemon(strings.ToLower(args))
+
+	moves := pokemon.PokeMoves(p, "emerald")
+	gn.Com.Client.Say(gn.Com.Channel, moves)
+}
+
+func tipos(gn *Generalbot, args string) {
+	p, _ := pokeapi.Pokemon(strings.ToLower(args))
+	if p.Name == "" {
+		return
+	}
+	typo := p.Types
+	message := p.Name + " es tipo: "
+	for _, v := range typo {
+		TypeName := v.Type.Name
+		Tipo, _ := pokeapi.Type(TypeName)
+		for _, t := range Tipo.Names {
+			if t.Language.Name == "es" {
+				TypeName = t.Name
+			}
+		}
+
+		message += TypeName + " "
+	}
+	gn.Com.Client.Say(gn.Com.Channel, message)
 }
