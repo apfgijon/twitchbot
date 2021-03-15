@@ -13,6 +13,8 @@ import (
 	"github.com/mtslzr/pokeapi-go"
 )
 
+const separator string = " ___________________________________________________ "
+
 func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 	switch message.Message {
 	case "gg":
@@ -104,8 +106,8 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 			transalatedresp := covid.Translate(args)
 			if transalatedresp != "" {
 				resp := covid.GetCovidCasesForProvince(transalatedresp)
-				formattedMessage := "Casos de covid de güei d'" + args + " ___________________________________________________ " +
-					"Casos novos güei: " + strconv.Itoa(resp.ConfirmedDiff) + " ___________________________________________________ " +
+				formattedMessage := "Casos de covid de güei d'" + args + separator +
+					"Casos novos güei: " + strconv.Itoa(resp.ConfirmedDiff) + separator +
 					"Mortos güei: " + strconv.Itoa(resp.DeathsDiff)
 				gn.Com.Client.Say(gn.Com.Channel, formattedMessage)
 				return true
@@ -113,8 +115,8 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 			args = strings.ToLower(args)
 			if args == "españa" {
 				casos, muertos := covid.GetCovidCasesSpain()
-				formattedMessage := "Casos de covid de güei d'" + args + " ___________________________________________________ " +
-					"Casos novos güei: " + strconv.Itoa(casos) + " ___________________________________________________ " +
+				formattedMessage := "Casos de covid de güei d'" + args + separator +
+					"Casos novos güei: " + strconv.Itoa(casos) + separator +
 					"Mortos güei: " + strconv.Itoa(muertos)
 				gn.Com.Client.Say(gn.Com.Channel, formattedMessage)
 				return true

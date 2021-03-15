@@ -8,8 +8,8 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-func StartClient(bot_name string, channel string, oauth string) {
-	client := twitch.NewClient(bot_name, oauth)
+func StartClient(botName string, channel string, oauth string) {
+	client := twitch.NewClient(botName, oauth)
 
 	riddle(client, channel)
 
@@ -17,7 +17,7 @@ func StartClient(bot_name string, channel string, oauth string) {
 
 		mensaje := strings.ToLower(message.Message)
 
-		if strings.Contains(mensaje, "nullcalloc") || strings.Contains(mensaje, "caloto") || strings.Contains(mensaje, "null"){
+		if strings.Contains(mensaje, "hoja") {
 			client.Say(channel, message.User.DisplayName+" Enhorabuena solo si no eres javi (Javi dejas de tryhardear ya?)")
 			time.Sleep(10)
 			os.Exit(1)
@@ -34,7 +34,7 @@ func StartClient(bot_name string, channel string, oauth string) {
 }
 
 func riddle(client *twitch.Client, channel string) {
-	message := "Adivina adivinanza."
+	message := "Ahí les va una adivinanaza.Tengo 6 caras 6 caras tengo. Reparto suerte a quien la tenga. Dejame contar hasta 6"
 
 	client.Say(channel, message)
 }

@@ -6,12 +6,12 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-func Start(bot_name string, channel string, oauth string) {
+func Start(botName string, channel string, oauth string) {
 
 	client := client.Communication{
-		Client:  twitch.NewClient(bot_name, oauth),
+		Client:  twitch.NewClient(botName, oauth),
 		Channel: channel,
-		BotName: bot_name,
+		BotName: botName,
 	}
 
 	generalbot := generalbot.Generalbot{

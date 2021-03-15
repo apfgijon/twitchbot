@@ -10,9 +10,11 @@ import (
 	"unicode/utf8"
 )
 
-func get_municipios() ([][]string, error) {
+const municipiosFile string = "Municipio.csv"
 
-	readerData, err := os.Open("Municipio.csv")
+func getMunicipios() ([][]string, error) {
+
+	readerData, err := os.Open(municipiosFile)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +35,7 @@ func get_municipios() ([][]string, error) {
 
 func ConvertToCsv() {
 
-	r, _ := ioutil.ReadFile("Municipio.csv")
+	r, _ := ioutil.ReadFile(municipiosFile)
 
 	rS := string(r[:])
 
@@ -41,12 +43,12 @@ func ConvertToCsv() {
 
 	rS = strings.ReplaceAll(rS, ",", ";")
 
-	ioutil.WriteFile("Municipio.csv", []byte(rS), 0)
+	ioutil.WriteFile(municipiosFile, []byte(rS), 0)
 
 }
 
 func Valid() {
-	r, _ := ioutil.ReadFile("Municipio.csv")
+	r, _ := ioutil.ReadFile(municipiosFile)
 	rS := string(r[:])
 	fmt.Println(utf8.ValidString(rS))
 }
@@ -55,7 +57,7 @@ func HablameSobre(mun string) string {
 
 	ret := ""
 	mun = strings.ToLower(mun)
-	allMuni, _ := get_municipios()
+	allMuni, _ := getMunicipios()
 	for _, data := range allMuni {
 
 		municipioInData := strings.ToLower(data[0])
@@ -70,7 +72,7 @@ func QueVer(mun string) string {
 
 	ret := ""
 	mun = strings.ToLower(mun)
-	allMuni, _ := get_municipios()
+	allMuni, _ := getMunicipios()
 	for _, data := range allMuni {
 
 		municipioInData := strings.ToLower(data[0])
