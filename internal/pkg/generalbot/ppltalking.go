@@ -67,7 +67,7 @@ func (gn *Generalbot) salute(message twitch.PrivateMessage) {
 	// 		gn.miamaguila = true
 	// 	}
 	// 	break
-	case "eseMick":
+	case "MickDiaz_":
 		if !gn.gallegu {
 			message := "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿ ⣿⣿⣿⣿⣿⠀⠶⣾⠀⣿⠀⠶⢶⡇⠐⠤⣵⣦⠀⣶⣿⢁⡀⢿⣿⣿⣿⣿⣿⣿ ⣿⣿⣿⣿⣿⣀⣿⣿⣀⣿⣀⣛⣛⣏⡙⣂⣼⣿⣀⣿⣇⣠⣤⣘⣿⣿⣿⣿⣿⣿ ⣿⡿⠋⣉⠙⣿⡏⠉⢿⡏⢹⣿⣿⠉⣿⣿⠉⣉⣉⣿⠋⣉⠙⣿⡏⠉⢿⣿⣿⣿ ⣿⣇⠸⠏⠉⡿⠀⠃⠘⡇⠸⠿⢿⠀⠿⢿⠀⠤⠤⣇⠸⠏⠉⡿⠀⠃⠘⣿⣿⣿ ⣿⣿⣶⣶⣾⣷⣾⣿⣶⣷⣶⣶⣾⣶⣶⣾⣶⣶⣶⣿⣷⣶⣾⣷⣾⣿⣶⣿⣿⣿"
 			gn.Com.Client.Say(gn.Com.Channel, message)

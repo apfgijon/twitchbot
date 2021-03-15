@@ -52,7 +52,7 @@ func (gn *Generalbot) onMessage(message twitch.PrivateMessage) {
 			message := "Que me dices " + message.User.DisplayName + "? nun ves que soy un bot? Amás nun pescancio castel.lán."
 			gn.Com.Client.Say(gn.Com.Channel, message)
 		}
-		if string(message.Message[0]) != "!" && string(message.Message[0]) != "@" && message.User.DisplayName != "Nightbot" {
+		if string(message.Message[0]) != "!" && string(message.Message[0]) != "@" && message.User.DisplayName != "Nightbot" && !strings.Contains(strings.ToLower(message.Message), "zonnyo") {
 			randomsay.SetPhrase(message.Message)
 		}
 	}

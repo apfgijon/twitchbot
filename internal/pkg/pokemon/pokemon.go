@@ -4,7 +4,6 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/mtslzr/pokeapi-go"
 	"github.com/mtslzr/pokeapi-go/structs"
 )
 
@@ -50,13 +49,13 @@ func getEmeraldMoves(poke structs.Pokemon, gameVersion string) map[int]string {
 			if versionMove.VersionGroup.Name == gameVersion {
 				MoveName := completeMove.Move.Name
 
-				Move, _ := pokeapi.Move(MoveName)
+				// Move, _ := pokeapi.Move(MoveName)
 
-				for _, names := range Move.Names {
-					if names.Language.Name == "es" {
-						MoveName = names.Name
-					}
-				}
+				// for _, names := range Move.Names {
+				// 	if names.Language.Name == "es" {
+				// 		MoveName = names.Name
+				// 	}
+				// }
 
 				moves[versionMove.LevelLearnedAt] = MoveName
 			}

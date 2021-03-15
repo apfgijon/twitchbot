@@ -15,6 +15,10 @@ import (
 
 func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 	switch message.Message {
+	case "gg":
+		message := "!yellow"
+		gn.Com.Client.Say(gn.Com.Channel, message)
+		break
 	case "!carton":
 		carton := cartongen.GenerateCarton()
 		message := "Esti ye'l Bingu bot del mio canal, Equí ta'l to cartón " + message.User.DisplayName + "                                                  "
@@ -36,11 +40,15 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 		gn.Com.Client.Say(gn.Com.Channel, response)
 		break
 	case "!muertos":
-		message := "Rython(Haz_A), Zigzagoon(JavvyoYT), Tyrogue(Yajuli) y Shelgon(Mr Socone) :("
+		message := "Rython(Haz_A), Zigzagoon(JavvyoYT), Tyrogue(Yajuli), Shelgon(Mr Socone), Crabby(lijo96), Relicanth(ZonnyoYT), Dodrio(lilwest), Golem(chinchypan), Charizard(Gonzalo), Kabutops(Mia), Crobat(bicicletis), Ampharos(wrysp), Cloyster(hetwan), Mewtwo(KAY) y Sceptile(Alick) :("
 		gn.Com.Client.Say(gn.Com.Channel, message)
 		break
 	case "!javi":
 		message := "Nah un putu tryhard de la de dios"
+		gn.Com.Client.Say(gn.Com.Channel, message)
+		break
+	case "!social":
+		message := "NO SOY"
 		gn.Com.Client.Say(gn.Com.Channel, message)
 		break
 	case "!skill":
@@ -140,12 +148,12 @@ func tipos(gn *Generalbot, args string) {
 	message := p.Name + " es tipo: "
 	for _, v := range typo {
 		TypeName := v.Type.Name
-		Tipo, _ := pokeapi.Type(TypeName)
-		for _, t := range Tipo.Names {
-			if t.Language.Name == "es" {
-				TypeName = t.Name
-			}
-		}
+		// Tipo, _ := pokeapi.Type(TypeName)
+		// for _, t := range Tipo.Names {
+		// 	if t.Language.Name == "es" {
+		// 		TypeName = t.Name
+		// 	}
+		// }
 
 		message += TypeName + " "
 	}
