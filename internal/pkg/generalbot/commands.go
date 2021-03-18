@@ -98,6 +98,9 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 		case "!tipo":
 			go tipos(gn, args)
 			break
+		case "!evo":
+			go evolution(gn, args)
+			break
 		case "!covid":
 			// if time.Now().Weekday() == 0 || time.Now().Weekday() == 5 || time.Now().Weekday() == 6 {
 			// 	gn.Com.Client.Say(gn.Com.Channel, message.User.DisplayName+", nun hai datos güei")
@@ -137,8 +140,15 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 func ataques(gn *Generalbot, args string) {
 	p, _ := pokeapi.Pokemon(strings.ToLower(args))
 
-	moves := pokemon.PokeMoves(p, "emerald")
+	moves := pokemon.PokeMoves(p, "heartgold-soulsilver")
 	gn.Com.Client.Say(gn.Com.Channel, moves)
+}
+
+func evolution(gn *Generalbot, args string) {
+	p, _ := pokeapi.PokemonSpecies(strings.ToLower(args))
+
+	evos := pokemon.PokeEvos(p)
+	gn.Com.Client.Say(gn.Com.Channel, evos)
 }
 
 func tipos(gn *Generalbot, args string) {

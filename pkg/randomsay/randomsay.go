@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-const phrasefile = "frases.json"
+const phrasefile = "frasesNUll.json"
 
 func GetRandomPhrase() string {
 	phrasesRaw, err := ioutil.ReadFile(phrasefile)

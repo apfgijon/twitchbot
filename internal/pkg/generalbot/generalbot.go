@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/apfgijon/cartones/internal/pkg/client"
+	"github.com/apfgijon/cartones/internal/pkg/pokemon"
 	"github.com/apfgijon/cartones/pkg/randomsay"
 	"github.com/gempir/go-twitch-irc/v2"
 )
@@ -34,6 +35,8 @@ func (gn *Generalbot) Init() {
 }
 
 func (gn *Generalbot) Start() {
+	pokemon.InitMoves()
+
 	gn.Com.Client.OnPrivateMessage(gn.onMessage)
 
 	gn.Com.Client.Join(gn.Com.Channel)
