@@ -13,33 +13,88 @@ import (
 	"github.com/mtslzr/pokeapi-go/structs"
 )
 
-var TransMoves map[string]string
+type PokeapiImpl struct {
+	TransMoves map[string]string
+	Movesfile  string
+}
 
-const Movesfile string = "SpanishMoves.json"
+func (pI *PokeapiImpl) Build() {
+	pI.Movesfile = "SpanishMoves.json"
+	pI.TransMoves = make(map[string]string)
+	pI.initMoves()
+}
 
-func InitMoves() {
-	TransMoves = make(map[string]string)
+func (pI *PokeapiImpl) initMoves() {
+	transMoves := make(map[string]string)
 
-	phrasesRaw, err := ioutil.ReadFile(Movesfile)
+	phrasesRaw, err := ioutil.ReadFile(pI.Movesfile)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	json.Unmarshal(phrasesRaw, &TransMoves)
+	json.Unmarshal(phrasesRaw, &transMoves)
+
+	pI.TransMoves = transMoves
 
 }
 
-func PokeMoves(poke structs.Pokemon, gameVersion string) string {
-	rawMoves := getEmeraldMoves(poke, gameVersion)
+func (pI *PokeapiImpl) PokeMoves(pokeS string, gameVersion string) map[int]string {
+	poke, _ := pI.checkIsAndRetPokemon(pokeS)
+
+	return pI.getGameMoves(poke, gameVersion)
+}
+
+func (pI *PokeapiImpl) PokeMovesFormatted(pokeS string, gameVersion string) string {
+	poke, _ := pI.checkIsAndRetPokemon(pokeS)
+
+	rawMoves := pI.getGameMoves(poke, gameVersion)
 
 	if len(rawMoves) == 0 {
 		return ""
 	}
 
-	return formatMoves(rawMoves, poke.Name)
+	return pI.formatMoves(rawMoves, poke.Name)
 }
 
-func sortMoves(moves map[int]string) []int {
+func (pI *PokeapiImpl) Types(pokeS string) string {
+	p, _ := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
+	if p.Name == "" {
+		return ""
+	}
+	typo := p.Types
+	typos := ""
+	for _, v := range typo {
+		TypeName := v.Type.Name
+		Tipo, _ := pokeapi.Type(TypeName)
+		for _, t := range Tipo.Names {
+			if t.Language.Name == "es" {
+				TypeName = t.Name
+			}
+		}
+
+		typos += TypeName + " "
+	}
+	return typos
+}
+
+func (pI *PokeapiImpl) CaptureRate(pokeS string) int {
+	p, _ := pokeapi.PokemonSpecies(strings.ToLower(pokeS))
+	return p.CaptureRate
+}
+
+func (pI *PokeapiImpl) Stats(pokeS string) string {
+	p, _ := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
+
+	stats := p.Name + ": "
+
+	for _, v := range p.Stats {
+		stats += v.Stat.Name + "=" + strconv.Itoa(v.BaseStat) + " | "
+
+	}
+	return stats
+}
+
+func (pI *PokeapiImpl) sortMoves(moves map[int]string) []int {
 	levels := make([]int, 0, len(moves))
 
 	for i := range moves {
@@ -49,33 +104,46 @@ func sortMoves(moves map[int]string) []int {
 	return levels
 }
 
-func formatMoves(moves map[int]string, name string) string {
+func (pI *PokeapiImpl) formatMoves(moves map[int]string, name string) string {
 
-	index := sortMoves(moves)
+	index := pI.sortMoves(moves)
 
 	formatPokemonMoves := name + ":"
 	for _, v := range index {
-		formatPokemonMoves += " lvl:" + strconv.Itoa(v) + "->" + moves[v] + " 🤙 "
+		if v <= 1 {
+			formatPokemonMoves += " lvl:" + "1" + "->" + moves[v] + " 🤙 "
+		} else {
+			formatPokemonMoves += " lvl:" + strconv.Itoa(v) + "->" + moves[v] + " 🤙 "
+		}
 	}
 
 	return formatPokemonMoves
 }
 
-func getEmeraldMoves(poke structs.Pokemon, gameVersion string) map[int]string {
+func (pI *PokeapiImpl) getGameMoves(poke structs.Pokemon, gameVersion string) map[int]string {
 	moves := make(map[int]string)
 
 	rawMoves := poke.Moves
+
+	i := 1
 
 	for _, completeMove := range rawMoves {
 		for _, versionMove := range completeMove.VersionGroupDetails {
 			if versionMove.VersionGroup.Name == gameVersion {
 				MoveName := completeMove.Move.Name
 
-				MoveName = getSpanishMove(MoveName)
-
-				moves[versionMove.LevelLearnedAt] = MoveName
+				MoveName = pI.getSpanishMove(MoveName)
+				if versionMove.LevelLearnedAt != 0 {
+					if versionMove.LevelLearnedAt == 1 {
+						moves[i] = MoveName
+						i--
+					} else {
+						moves[versionMove.LevelLearnedAt] = MoveName
+					}
+				}
 			}
 		}
+
 	}
 	return moves
 }
@@ -85,13 +153,20 @@ type Item struct {
 	URL  string
 }
 
-func PokeEvos(Specie structs.PokemonSpecies) string {
-	allurl := strings.Split(Specie.EvolutionChain.URL, "/")
+func (pI *PokeapiImpl) PokeEvos(pokeS string) string {
+
+	pS, _ := pokeapi.PokemonSpecies(strings.ToLower(pokeS))
+
+	allurl := strings.Split(pS.EvolutionChain.URL, "/")
 	if len(allurl) < 3 {
 		return ""
 	}
 	evos, _ := pokeapi.EvolutionChain(allurl[len(allurl)-2])
 	evosString := evos.Chain.Species.Name
+
+	if len(evos.Chain.EvolvesTo) == 0 {
+		return evosString + " no tiene evoluciones :("
+	}
 
 	if len(evos.Chain.EvolvesTo[0].EvolutionDetails) != 0 {
 
@@ -131,7 +206,7 @@ func PokeEvos(Specie structs.PokemonSpecies) string {
 					var item Item
 
 					json.Unmarshal(itemRaw, &item)
-					evosString += "Saber movimiento: " + getSpanishMove(item.Name)
+					evosString += "Saber movimiento: " + pI.getSpanishMove(item.Name)
 					evosString += " " + Newevos[i].Species.Name
 				} else if Newevos[i].EvolutionDetails[0].KnownMoveType != nil {
 					itemRaw, _ := json.Marshal(Newevos[i].EvolutionDetails[0].KnownMoveType)
@@ -204,6 +279,12 @@ func PokeEvos(Specie structs.PokemonSpecies) string {
 	return evosString
 }
 
-func getSpanishMove(MoveName string) string {
-	return TransMoves[MoveName]
+func (pI *PokeapiImpl) getSpanishMove(MoveName string) string {
+	return pI.TransMoves[MoveName]
+}
+
+func (pI *PokeapiImpl) checkIsAndRetPokemon(args string) (structs.Pokemon, error) {
+	p, err := pokeapi.Pokemon(args)
+
+	return p, err
 }

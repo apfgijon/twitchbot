@@ -10,14 +10,14 @@ const timeToWait = time.Minute * 3
 
 func (gn *Generalbot) sayRandomPhrase() {
 	for {
-		gn.Com.Client.Say(gn.Com.Channel, randomsay.GetRandomPhrase())
+		gn.com.Client.Say(gn.com.Channel, randomsay.GetRandomPhrase())
 		time.Sleep(timeToWait)
 	}
 }
 
 func (gn *Generalbot) sayRandomRefran() {
 	for {
-		gn.Com.Client.Say(gn.Com.Channel, randomsay.GetRandomRefran())
+		gn.com.Client.Say(gn.com.Channel, randomsay.GetRandomRefran())
 		time.Sleep(timeToWait)
 	}
 }

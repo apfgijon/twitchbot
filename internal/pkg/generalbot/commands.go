@@ -1,14 +1,15 @@
 package generalbot
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"strconv"
 	"strings"
 
 	"github.com/apfgijon/cartones/internal/pkg/municipios"
-	"github.com/apfgijon/cartones/internal/pkg/pokemon"
 	"github.com/apfgijon/cartones/pkg/cartongen"
-	"github.com/apfgijon/cartones/pkg/covid"
 	"github.com/gempir/go-twitch-irc/v2"
 	"github.com/mtslzr/pokeapi-go"
 )
@@ -16,52 +17,30 @@ import (
 const separator string = " ___________________________________________________ "
 
 func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
+
+	ret := gn.checkStaticCommands(message)
+
+	if ret == true {
+		return ret
+	}
+
 	switch message.Message {
-	case "gg":
-		message := "!yellow"
-		gn.Com.Client.Say(gn.Com.Channel, message)
-		break
 	case "!carton":
 		carton := cartongen.GenerateCarton()
 		message := "Esti ye'l Bingu bot del mio canal, Equí ta'l to cartón " + message.User.DisplayName + "                                                  "
 		message = message + carton
-		gn.Com.Client.Say(gn.Com.Channel, message)
+		gn.com.Client.Say(gn.com.Channel, message)
 		break
 	case "!albur", "!hot", "!colorled":
 		message := "Que faes usando Nightbot tando yo equí " + message.User.DisplayName + "? Yo de verdá nun pescancio res"
-		gn.Com.Client.Say(gn.Com.Channel, message)
-		break
-	case "!gonzalo":
-		message := "shhhh nun fales de \"E LOGO\""
-		gn.Com.Client.Say(gn.Com.Channel, message)
+		gn.com.Client.Say(gn.com.Channel, message)
 		break
 	case "!pokemon":
 		l, _ := pokeapi.Resource("pokemon", 0, 386)
 		RandomPoke := l.Results[rand.Intn(len(l.Results))]
 		response := message.User.DisplayName + " tiene la personalidad de " + RandomPoke.Name
-		gn.Com.Client.Say(gn.Com.Channel, response)
+		gn.com.Client.Say(gn.com.Channel, response)
 		break
-	case "!muertos":
-		message := "Rython(Haz_A), Zigzagoon(JavvyoYT), Tyrogue(Yajuli), Shelgon(Mr Socone), Crabby(lijo96), Relicanth(ZonnyoYT), Dodrio(lilwest), Golem(chinchypan), Charizard(Gonzalo), Kabutops(Mia), Crobat(bicicletis), Ampharos(wrysp), Cloyster(hetwan), Mewtwo(KAY) y Sceptile(Alick) :("
-		gn.Com.Client.Say(gn.Com.Channel, message)
-		break
-	case "!javi":
-		message := "Nah un putu tryhard de la de dios"
-		gn.Com.Client.Say(gn.Com.Channel, message)
-		break
-	case "!social":
-		message := "NO SOY"
-		gn.Com.Client.Say(gn.Com.Channel, message)
-		break
-	case "!skill":
-		message := "https://clips.twitch.tv/BloodyColdbloodedShrewNotATK"
-		gn.Com.Client.Say(gn.Com.Channel, message)
-		break
-		// case "!alexa":
-		// 	number := alexa.GetNumber()
-		// 	message := "Caloto ha discutido con alexa " + strconv.Itoa(number) + " veces en stream"
-		// 	gn.Com.Client.Say(gn.Com.Channel, message)
-		// 	break
 	}
 
 	completeCommand := strings.Split(message.Message, " ")
@@ -74,59 +53,64 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 		case "!municipio":
 
 			resp := municipios.HablameSobre(args)
-			gn.Com.Client.Say(gn.Com.Channel, resp)
+			gn.com.Client.Say(gn.com.Channel, resp)
+			break
+		case "!pokemon":
+			l, _ := pokeapi.Resource("pokemon", 0, 386)
+			RandomPoke := l.Results[rand.Intn(len(l.Results))]
+			response := args + " tiene la personalidad de " + RandomPoke.Name
+			gn.com.Client.Say(gn.com.Channel, response)
 			break
 
 		case "!quever":
 
 			resp := municipios.QueVer(args)
-			gn.Com.Client.Say(gn.Com.Channel, resp)
+			gn.com.Client.Say(gn.com.Channel, resp)
 			break
-		case "!ataques":
-			go ataques(gn, args)
-			break
-		case "!comoes":
-			p, _ := pokeapi.Pokemon(strings.ToLower(args))
-			resp := p.Sprites.FrontDefault
-			gn.Com.Client.Say(gn.Com.Channel, resp)
-			break
-		case "!comoesshiny":
-			p, _ := pokeapi.Pokemon(strings.ToLower(args))
-			resp := p.Sprites.FrontShiny
-			gn.Com.Client.Say(gn.Com.Channel, resp)
+		case "!ataques", "!moves":
+			go gn.ataques(args, "heartgold-soulsilver")
 			break
 		case "!tipo":
-			go tipos(gn, args)
+			go gn.tipos(args)
 			break
 		case "!evo":
-			go evolution(gn, args)
+			go gn.evolution(args)
+			break
+		case "!stats":
+			go gn.stats(args)
+			break
+		case "!capture", "!captura":
+			go gn.captureRate(args)
 			break
 		case "!covid":
-			// if time.Now().Weekday() == 0 || time.Now().Weekday() == 5 || time.Now().Weekday() == 6 {
-			// 	gn.Com.Client.Say(gn.Com.Channel, message.User.DisplayName+", nun hai datos güei")
-			// 	return true
-			// }
-			transalatedresp := covid.Translate(args)
+			transalatedresp := gn.covid.FormatName(args)
 			if transalatedresp != "" {
-				resp := covid.GetCovidCasesForProvince(transalatedresp)
+				casos, muertos := gn.covid.GetCovidCasesForProvince(transalatedresp)
 				formattedMessage := "Casos de covid de güei d'" + args + separator +
-					"Casos novos güei: " + strconv.Itoa(resp.ConfirmedDiff) + separator +
-					"Mortos güei: " + strconv.Itoa(resp.DeathsDiff)
-				gn.Com.Client.Say(gn.Com.Channel, formattedMessage)
+					"Casos novos güei: " + strconv.Itoa(casos) + separator +
+					"Mortos güei: " + strconv.Itoa(muertos)
+				if casos == 0 {
+					formattedMessage = "Vaya, parece que no tengo datos hoy @" + message.User.DisplayName + " :("
+				}
+				gn.com.Client.Say(gn.com.Channel, formattedMessage)
 				return true
 			}
 			args = strings.ToLower(args)
 			if args == "españa" {
-				casos, muertos := covid.GetCovidCasesSpain()
+				casos, muertos := gn.covid.GetCovidCasesSpain()
+
 				formattedMessage := "Casos de covid de güei d'" + args + separator +
 					"Casos novos güei: " + strconv.Itoa(casos) + separator +
 					"Mortos güei: " + strconv.Itoa(muertos)
-				gn.Com.Client.Say(gn.Com.Channel, formattedMessage)
+				if casos == 0 {
+					formattedMessage = "Vaya, parece que no tengo datos hoy @" + message.User.DisplayName + " :("
+				}
+				gn.com.Client.Say(gn.com.Channel, formattedMessage)
 				return true
 
 			}
 			formattedMessage := "Nun sei " + message.User.DisplayName + ", abondo que poño casos d'españa"
-			gn.Com.Client.Say(gn.Com.Channel, formattedMessage)
+			gn.com.Client.Say(gn.com.Channel, formattedMessage)
 			break
 		default:
 			return false
@@ -137,37 +121,44 @@ func (gn *Generalbot) checkCommands(message twitch.PrivateMessage) bool {
 	return false
 }
 
-func ataques(gn *Generalbot, args string) {
-	p, _ := pokeapi.Pokemon(strings.ToLower(args))
+func (gn *Generalbot) checkStaticCommands(message twitch.PrivateMessage) bool {
+	commandsRaw, err := ioutil.ReadFile("commands.json")
 
-	moves := pokemon.PokeMoves(p, "heartgold-soulsilver")
-	gn.Com.Client.Say(gn.Com.Channel, moves)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	commands := make(map[string]string)
+
+	json.Unmarshal(commandsRaw, &commands)
+
+	for i, v := range commands {
+		if i == message.Message {
+			gn.com.Client.Say(gn.com.Channel, v)
+			return true
+		}
+	}
+
+	return false
 }
 
-func evolution(gn *Generalbot, args string) {
-	p, _ := pokeapi.PokemonSpecies(strings.ToLower(args))
-
-	evos := pokemon.PokeEvos(p)
-	gn.Com.Client.Say(gn.Com.Channel, evos)
+func (gn *Generalbot) ataques(args string, game string) {
+	gn.com.Client.Say(gn.com.Channel, gn.poke.PokeMovesFormatted(args, game))
 }
 
-func tipos(gn *Generalbot, args string) {
-	p, _ := pokeapi.Pokemon(strings.ToLower(args))
-	if p.Name == "" {
-		return
-	}
-	typo := p.Types
-	message := p.Name + " es tipo: "
-	for _, v := range typo {
-		TypeName := v.Type.Name
-		// Tipo, _ := pokeapi.Type(TypeName)
-		// for _, t := range Tipo.Names {
-		// 	if t.Language.Name == "es" {
-		// 		TypeName = t.Name
-		// 	}
-		// }
+func (gn *Generalbot) evolution(args string) {
+	gn.com.Client.Say(gn.com.Channel, gn.poke.PokeEvos(args))
+}
 
-		message += TypeName + " "
-	}
-	gn.Com.Client.Say(gn.Com.Channel, message)
+func (gn *Generalbot) captureRate(args string) {
+	gn.com.Client.Say(gn.com.Channel, "Ratio de captura de "+args+": "+strconv.Itoa(gn.poke.CaptureRate(args)))
+}
+
+func (gn *Generalbot) tipos(args string) {
+	gn.com.Client.Say(gn.com.Channel, gn.poke.Types(args))
+}
+
+func (gn *Generalbot) stats(args string) {
+	gn.com.Client.Say(gn.com.Channel, gn.poke.Stats(args))
 }

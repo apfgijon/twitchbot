@@ -2,7 +2,7 @@ package covid
 
 import "strings"
 
-func Translate(province string) string {
+func (cI *CovidApiImpl) FormatName(province string) string {
 	province = strings.ToLower(province)
 	switch province {
 	case "andalucia", "andalucía":

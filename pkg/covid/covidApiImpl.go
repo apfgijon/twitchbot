@@ -33,8 +33,16 @@ type CovidData struct {
 	} `json:"region"`
 }
 
-func getRawData() []byte {
-	resp, err := http.Get("https://covid-api.com/api/reports?iso=ESP")
+type CovidApiImpl struct {
+	apiUrl string
+}
+
+func (cI *CovidApiImpl) Build() {
+	cI.apiUrl = "https://covid-api.com/api/reports?iso=ESP"
+}
+
+func (cI *CovidApiImpl) getRawData() []byte {
+	resp, err := http.Get(cI.apiUrl)
 
 	if err != nil {
 		return nil
@@ -49,27 +57,27 @@ func getRawData() []byte {
 	return body
 }
 
-func GetCovidCases() *FullCovidDataArray {
+func (cI *CovidApiImpl) getCovidCases() *FullCovidDataArray {
 	var retData *FullCovidDataArray
-	json.Unmarshal(getRawData(), &retData)
+	json.Unmarshal(cI.getRawData(), &retData)
 	return retData
 }
 
-func GetCovidCasesForProvince(province string) CovidData {
+func (cI *CovidApiImpl) GetCovidCasesForProvince(province string) (int, int) {
 	var provinceCovidData CovidData
 	province = strings.ToLower(province)
-	for _, data := range GetCovidCases().Data {
+	for _, data := range cI.getCovidCases().Data {
 		if strings.ToLower(data.Region.Province) == province {
 			provinceCovidData = data
 		}
 	}
-	return provinceCovidData
+	return provinceCovidData.ConfirmedDiff, provinceCovidData.DeathsDiff
 }
 
-func GetCovidCasesSpain() (int, int) { //(casos,muertos)
+func (cI *CovidApiImpl) GetCovidCasesSpain() (int, int) { //(casos,muertos)
 	casos := 0
 	muertos := 0
-	for _, data := range GetCovidCases().Data {
+	for _, data := range cI.getCovidCases().Data {
 		casos += data.ConfirmedDiff
 		muertos += data.DeathsDiff
 	}

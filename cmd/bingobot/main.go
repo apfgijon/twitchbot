@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -24,12 +25,16 @@ func main() {
 	flag.Parse()
 
 	if botName == "" || channel == "" || oauth == "" {
+		fmt.Println("Wrong usage!")
+		fmt.Println("bot -b <account> -c <channel> -o <oauth code>")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
 	pokeapi.CacheSettings.CustomExpire = 1000000000000000
 
-	twitchbot.Start(botName, channel, oauth)
+	bot := twitchbot.Twitchbot{}
+	bot.Build(botName, channel, oauth)
+	bot.Bootstrap()
 	//riddle.StartClient(botName, channel, oauth)
 }

@@ -4,56 +4,48 @@ import (
 	"strings"
 
 	"github.com/apfgijon/cartones/internal/pkg/client"
-	"github.com/apfgijon/cartones/internal/pkg/pokemon"
+	"github.com/apfgijon/cartones/pkg/covid"
+	"github.com/apfgijon/cartones/pkg/pokemon"
 	"github.com/apfgijon/cartones/pkg/randomsay"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-type Generalbot struct {
-	Com          client.Communication
-	JavvyoYTesta bool
-	HannyaYTesta bool
-	Trollchuesta bool
-	Haz_Aesta    bool
-	chisseiesta  bool
-	zaraaify     bool
-	mariana      bool
-	miamaguila   bool
-	gallegu      bool
+type Bot interface {
+	Init(p pokemon.PokeInfo, c client.Communication)
+	Start()
 }
 
-func (gn *Generalbot) Init() {
-	gn.JavvyoYTesta = false
-	gn.HannyaYTesta = false
-	gn.Trollchuesta = false
-	gn.Haz_Aesta = false
-	gn.chisseiesta = false
-	gn.zaraaify = false
-	gn.mariana = false
-	gn.miamaguila = false
-	gn.gallegu = false
+type Generalbot struct {
+	com   client.Communication
+	poke  pokemon.PokeInfo
+	covid covid.CovidInfo
+}
+
+func (gn *Generalbot) Init(p pokemon.PokeInfo, c client.Communication, cov covid.CovidInfo) {
+	gn.poke = p
+	gn.com = c
+	gn.covid = cov
 }
 
 func (gn *Generalbot) Start() {
-	pokemon.InitMoves()
+	gn.poke.Build()
 
-	gn.Com.Client.OnPrivateMessage(gn.onMessage)
+	gn.com.Client.OnPrivateMessage(gn.onMessage)
 
-	gn.Com.Client.Join(gn.Com.Channel)
-	go gn.sayRandomPhrase()
+	gn.com.Client.Join(gn.com.Channel)
+	// go gn.sayRandomPhrase()
 	// go gn.sayRandomRefran()
-	err := gn.Com.Client.Connect()
+	err := gn.com.Client.Connect()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (gn *Generalbot) onMessage(message twitch.PrivateMessage) {
-	gn.salute(message)
 	if !gn.checkCommands(message) {
-		if strings.Contains(strings.ToUpper(message.Message), strings.ToUpper(gn.Com.BotName)) {
+		if strings.Contains(strings.ToUpper(message.Message), strings.ToUpper(gn.com.BotName)) {
 			message := "Que me dices " + message.User.DisplayName + "? nun ves que soy un bot? Amás nun pescancio castel.lán."
-			gn.Com.Client.Say(gn.Com.Channel, message)
+			gn.com.Client.Say(gn.com.Channel, message)
 		}
 		if string(message.Message[0]) != "!" && string(message.Message[0]) != "@" && message.User.DisplayName != "Nightbot" && !strings.Contains(strings.ToLower(message.Message), "zonnyo") {
 			randomsay.SetPhrase(message.Message)
