@@ -1,4 +1,4 @@
-package generalbot
+package bot
 
 import (
 	"time"

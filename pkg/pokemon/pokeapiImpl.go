@@ -15,26 +15,45 @@ import (
 
 type PokeapiImpl struct {
 	TransMoves map[string]string
+	TransTypes map[string]string
 	Movesfile  string
+	Typesfile  string
+}
+
+func NewPokemonImpl() PokeInfo {
+	return &PokeapiImpl{}
 }
 
 func (pI *PokeapiImpl) Build() {
 	pI.Movesfile = "SpanishMoves.json"
 	pI.TransMoves = make(map[string]string)
+	pI.Typesfile = "SpanishTypes.json"
+	pI.TransTypes = make(map[string]string)
 	pI.initMoves()
 }
 
 func (pI *PokeapiImpl) initMoves() {
 	transMoves := make(map[string]string)
 
-	phrasesRaw, err := ioutil.ReadFile(pI.Movesfile)
+	movesRaw, err := ioutil.ReadFile(pI.Movesfile)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	json.Unmarshal(phrasesRaw, &transMoves)
+	json.Unmarshal(movesRaw, &transMoves)
 
 	pI.TransMoves = transMoves
+
+	transTypes := make(map[string]string)
+
+	typesRaw, err := ioutil.ReadFile(pI.Typesfile)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	json.Unmarshal(typesRaw, &transTypes)
+
+	pI.TransTypes = transTypes
 
 }
 
@@ -145,6 +164,29 @@ func (pI *PokeapiImpl) getGameMoves(poke structs.Pokemon, gameVersion string) ma
 		}
 
 	}
+	return moves
+}
+
+func (pI *PokeapiImpl) getGameMovesMT(poke structs.Pokemon, gameVersion string) []string {
+	moves := make([]string, 0)
+
+	rawMoves := poke.Moves
+
+	for _, completeMove := range rawMoves {
+		for _, versionMove := range completeMove.VersionGroupDetails {
+			if versionMove.VersionGroup.Name == gameVersion {
+				MoveName := completeMove.Move.Name
+
+				MoveName = pI.getSpanishMove(MoveName)
+				if versionMove.MoveLearnMethod.Name == "machine" {
+
+					moves = append(moves, MoveName)
+				}
+			}
+		}
+
+	}
+
 	return moves
 }
 
@@ -281,6 +323,150 @@ func (pI *PokeapiImpl) PokeEvos(pokeS string) string {
 
 func (pI *PokeapiImpl) getSpanishMove(MoveName string) string {
 	return pI.TransMoves[MoveName]
+}
+
+func (pI *PokeapiImpl) TypeTable(typo string) string {
+
+	TypeS := pI.getEnglishType(typo)
+
+	if TypeS == "" {
+		return TypeS
+	}
+
+	Type, _ := pokeapi.Type(TypeS)
+
+	ret := "Tipo: " + pI.getSpanishType(Type.Name) + " | "
+
+	ret += pI.formatTypesTo(Type)
+
+	ret += " | "
+
+	ret += pI.formatTypesFrom(Type)
+
+	return ret
+}
+
+func (pI *PokeapiImpl) TypeTableFrom(typo string) string {
+
+	TypeS := pI.getEnglishType(typo)
+
+	if TypeS == "" {
+		return TypeS
+	}
+
+	Type, _ := pokeapi.Type(TypeS)
+
+	ret := "Tipo: " + pI.getSpanishType(Type.Name) + " | "
+
+	ret += pI.formatTypesFrom(Type)
+
+	return ret
+}
+
+func (pI *PokeapiImpl) TypeTableTo(typo string) string {
+
+	TypeS := pI.getEnglishType(typo)
+
+	if TypeS == "" {
+		return TypeS
+	}
+
+	Type, _ := pokeapi.Type(TypeS)
+
+	ret := "Tipo: " + pI.getSpanishType(Type.Name) + " | "
+
+	ret += pI.formatTypesTo(Type)
+
+	return ret
+}
+
+func (pI *PokeapiImpl) formatTypesFrom(Type structs.Type) string {
+	format := ""
+
+	if len(Type.DamageRelations.DoubleDamageFrom) > 0 {
+		format += " LU JODE: "
+		for _, v := range Type.DamageRelations.DoubleDamageFrom {
+			format += pI.getSpanishType(v.Name) + ", "
+		}
+		format = format[:len(format)-2]
+	}
+
+	if len(Type.DamageRelations.HalfDamageFrom) > 0 {
+		format += " | "
+		format += " RESISTE: "
+
+		for _, v := range Type.DamageRelations.HalfDamageFrom {
+			itemRaw, _ := json.Marshal(v)
+
+			var item Item
+
+			json.Unmarshal(itemRaw, &item)
+			format += pI.getSpanishType(item.Name) + ", "
+		}
+		format = format[:len(format)-2]
+	}
+
+	if len(Type.DamageRelations.NoDamageFrom) > 0 {
+		format += " | "
+		format += " NO LE AFECTA: "
+		for _, v := range Type.DamageRelations.NoDamageFrom {
+			format += pI.getSpanishType(v.Name) + ", "
+		}
+		format = format[:len(format)-2]
+	}
+
+	return format
+}
+
+func (pI *PokeapiImpl) formatTypesTo(Type structs.Type) string {
+	format := ""
+
+	if len(Type.DamageRelations.DoubleDamageTo) > 0 {
+		format += " EFECTIVO CONTRA: "
+		for _, v := range Type.DamageRelations.DoubleDamageTo {
+			itemRaw, _ := json.Marshal(v)
+
+			var item Item
+
+			json.Unmarshal(itemRaw, &item)
+			format += pI.getSpanishType(item.Name) + ", "
+		}
+		format = format[:len(format)-2]
+	}
+
+	if len(Type.DamageRelations.HalfDamageTo) > 0 {
+		format += " | "
+		format += " PUTA MIERDA CONTRA: "
+		for _, v := range Type.DamageRelations.HalfDamageTo {
+			format += pI.getSpanishType(v.Name) + ", "
+		}
+		format = format[:len(format)-2]
+	}
+
+	if len(Type.DamageRelations.NoDamageTo) > 0 {
+		format += " | "
+		format += " NO EFECTIVO CONTRA: "
+		for _, v := range Type.DamageRelations.NoDamageTo {
+			format += pI.getSpanishType(v.Name) + ", "
+		}
+		format = format[:len(format)-2]
+	}
+
+	return format
+}
+
+func (pI *PokeapiImpl) getSpanishType(TypeName string) string {
+	return pI.TransTypes[TypeName]
+}
+
+func (pI *PokeapiImpl) getEnglishType(TypeName string) string {
+	ret := ""
+	for i, v := range pI.TransTypes {
+		if strings.ToLower(v) == strings.ToLower(TypeName) {
+			ret = i
+		}
+	}
+	return ret
 }
 
 func (pI *PokeapiImpl) checkIsAndRetPokemon(args string) (structs.Pokemon, error) {

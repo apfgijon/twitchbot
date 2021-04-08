@@ -33,8 +33,7 @@ func main() {
 
 	pokeapi.CacheSettings.CustomExpire = 1000000000000000
 
-	bot := twitchbot.Twitchbot{}
-	bot.Build(botName, channel, oauth)
+	bot := twitchbot.NewTwitchBot(botName, channel, oauth)
 	bot.Bootstrap()
 	//riddle.StartClient(botName, channel, oauth)
 }
