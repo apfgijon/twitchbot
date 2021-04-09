@@ -9,16 +9,20 @@ import (
 	"github.com/apfgijon/cartones/internal/pkg/A-comunication/bot"
 	"github.com/apfgijon/cartones/internal/pkg/A-comunication/client"
 	"github.com/apfgijon/cartones/internal/pkg/B-commands/commands/commandsv1"
+	"github.com/apfgijon/cartones/internal/pkg/C-style/prov"
+	"github.com/apfgijon/cartones/pkg/cartongen"
 	"github.com/apfgijon/cartones/pkg/covid"
 	"github.com/apfgijon/cartones/pkg/pokemon"
 )
 
 // Injectors from wire.go:
 
-func InitializeBot(communication client.Communication) (bot.Bot, error) {
-	pokeInfo := pokemon.NewPokemonImpl()
+func InitializeBot(c client.Communication, pokeGame string) (bot.Bot, error) {
+	pokeInfo := pokemon.NewPokemonImpl(pokeGame)
 	covidInfo := covid.NewCovidApi()
-	commandsCommands := commands.NewCommandImpl(pokeInfo, covidInfo)
-	botBot := bot.NewGeneralBot(commandsCommands, communication)
+	carton := cartongen.NewCartonv1()
+	messageProvider := prov.NewMessageProoviderv1(pokeInfo, covidInfo, carton)
+	commandsCommands := commands.NewCommandImpl(messageProvider)
+	botBot := bot.NewGeneralBot(commandsCommands, c)
 	return botBot, nil
 }

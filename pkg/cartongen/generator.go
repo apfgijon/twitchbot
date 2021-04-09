@@ -5,28 +5,35 @@ import (
 	"math/rand"
 )
 
-func GenerateCarton() string {
+type Cartonv1 struct {
+}
+
+func NewCartonv1() Carton {
+	return &Cartonv1{}
+}
+
+func (this *Cartonv1) GenerateCarton() string {
 	var carton [3][9]string
 
-	fillWithRandomNumbers(&carton)
+	this.fillWithRandomNumbers(&carton)
 
-	put0sIntoCarton(&carton)
+	this.put0sIntoCarton(&carton)
 
-	ret := stripCarton(carton)
+	ret := this.stripCarton(carton)
 
 	return ret
 }
 
-func fillWithRandomNumbers(carton *[3][9]string) {
+func (this *Cartonv1) fillWithRandomNumbers(carton *[3][9]string) {
 	noDuplicateNumbers := []int{}
 	var cartonInt [3][9]int
 
 	for row := 0; row < len(carton); row++ {
 		for col := 0; col < len(carton[row]); col++ {
 
-			number := generateRandomNumberCarton()
-			for contains(noDuplicateNumbers, number) {
-				number = generateRandomNumberCarton()
+			number := this.generateRandomNumberCarton()
+			for this.contains(noDuplicateNumbers, number) {
+				number = this.generateRandomNumberCarton()
 			}
 			cartonInt[row][col] = number
 			if number < 10 {
@@ -39,12 +46,12 @@ func fillWithRandomNumbers(carton *[3][9]string) {
 	}
 }
 
-func put0sIntoCarton(carton *[3][9]string) {
+func (this *Cartonv1) put0sIntoCarton(carton *[3][9]string) {
 	for row := 0; row < len(carton); row++ {
 		XPosition := []int{}
 		for i := 0; i < 4; i++ {
 			number := rand.Intn(9)
-			for contains(XPosition, number) {
+			for this.contains(XPosition, number) {
 				number = rand.Intn(9)
 			}
 			XPosition = append(XPosition, number)
@@ -55,7 +62,7 @@ func put0sIntoCarton(carton *[3][9]string) {
 	}
 }
 
-func contains(s []int, number int) bool {
+func (this *Cartonv1) contains(s []int, number int) bool {
 	for _, v := range s {
 		if v == number {
 			return true
@@ -65,11 +72,11 @@ func contains(s []int, number int) bool {
 	return false
 }
 
-func generateRandomNumberCarton() int {
+func (this *Cartonv1) generateRandomNumberCarton() int {
 	return rand.Intn(99) + 1
 }
 
-func stripCarton(carton [3][9]string) string {
+func (this *Cartonv1) stripCarton(carton [3][9]string) string {
 	InitString := " |"
 	for row := 0; row < len(carton); row++ {
 		for col := 0; col < len(carton[row]); col++ {

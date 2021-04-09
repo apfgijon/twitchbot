@@ -17,10 +17,12 @@ func main() {
 	var botName string
 	var channel string
 	var oauth string
+	var pokeGame string
 
 	flag.StringVar(&botName, "b", "", "[required] Bot account name")
 	flag.StringVar(&channel, "c", "", "[required] Channel to connect bot")
 	flag.StringVar(&oauth, "o", "", "[required] Oauth key")
+	flag.StringVar(&pokeGame, "pokeGame", "HG", "Pokemon Game Version")
 
 	flag.Parse()
 
@@ -33,7 +35,7 @@ func main() {
 
 	pokeapi.CacheSettings.CustomExpire = 1000000000000000
 
-	bot := twitchbot.NewTwitchBot(botName, channel, oauth)
+	bot := twitchbot.NewTwitchBot(botName, channel, oauth, pokeGame)
 	bot.Bootstrap()
 	//riddle.StartClient(botName, channel, oauth)
 }

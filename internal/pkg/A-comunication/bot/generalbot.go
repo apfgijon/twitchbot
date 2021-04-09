@@ -40,7 +40,6 @@ func (this *Generalbot) Start() {
 }
 
 func (this *Generalbot) onMessage(message twitch.PrivateMessage) {
-
 	go this.checkCommands(message)
 
 	if string(message.Message[0]) != "!" && string(message.Message[0]) != "@" && message.User.DisplayName != "Nightbot" && !strings.Contains(strings.ToLower(message.Message), "zonnyo") {

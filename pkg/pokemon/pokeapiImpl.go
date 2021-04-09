@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"sort"
 	"strconv"
@@ -18,10 +19,21 @@ type PokeapiImpl struct {
 	TransTypes map[string]string
 	Movesfile  string
 	Typesfile  string
+	game       string
 }
 
-func NewPokemonImpl() PokeInfo {
-	return &PokeapiImpl{}
+func NewPokemonImpl(g string) PokeInfo {
+	var gameSelected string
+	switch g {
+	case "HG":
+		gameSelected = "heartgold-soulsilver"
+		break
+	default:
+		gameSelected = "heartgold-soulsilver"
+	}
+	return &PokeapiImpl{
+		game: gameSelected,
+	}
 }
 
 func (pI *PokeapiImpl) Build() {
@@ -57,16 +69,16 @@ func (pI *PokeapiImpl) initMoves() {
 
 }
 
-func (pI *PokeapiImpl) PokeMoves(pokeS string, gameVersion string) map[int]string {
+func (pI *PokeapiImpl) PokeMoves(pokeS string) map[int]string {
 	poke, _ := pI.checkIsAndRetPokemon(pokeS)
 
-	return pI.getGameMoves(poke, gameVersion)
+	return pI.getGameMoves(poke)
 }
 
-func (pI *PokeapiImpl) PokeMovesFormatted(pokeS string, gameVersion string) string {
+func (pI *PokeapiImpl) PokeMovesFormatted(pokeS string) string {
 	poke, _ := pI.checkIsAndRetPokemon(pokeS)
 
-	rawMoves := pI.getGameMoves(poke, gameVersion)
+	rawMoves := pI.getGameMoves(poke)
 
 	if len(rawMoves) == 0 {
 		return ""
@@ -139,7 +151,14 @@ func (pI *PokeapiImpl) formatMoves(moves map[int]string, name string) string {
 	return formatPokemonMoves
 }
 
-func (pI *PokeapiImpl) getGameMoves(poke structs.Pokemon, gameVersion string) map[int]string {
+func (pI *PokeapiImpl) PokeRandom() string {
+
+	l, _ := pokeapi.Resource("pokemon", 0, 386)
+
+	return l.Results[rand.Intn(len(l.Results))].Name
+}
+
+func (pI *PokeapiImpl) getGameMoves(poke structs.Pokemon) map[int]string {
 	moves := make(map[int]string)
 
 	rawMoves := poke.Moves
@@ -148,7 +167,7 @@ func (pI *PokeapiImpl) getGameMoves(poke structs.Pokemon, gameVersion string) ma
 
 	for _, completeMove := range rawMoves {
 		for _, versionMove := range completeMove.VersionGroupDetails {
-			if versionMove.VersionGroup.Name == gameVersion {
+			if versionMove.VersionGroup.Name == pI.game {
 				MoveName := completeMove.Move.Name
 
 				MoveName = pI.getSpanishMove(MoveName)
@@ -167,14 +186,14 @@ func (pI *PokeapiImpl) getGameMoves(poke structs.Pokemon, gameVersion string) ma
 	return moves
 }
 
-func (pI *PokeapiImpl) getGameMovesMT(poke structs.Pokemon, gameVersion string) []string {
+func (pI *PokeapiImpl) getGameMovesMT(poke structs.Pokemon) []string {
 	moves := make([]string, 0)
 
 	rawMoves := poke.Moves
 
 	for _, completeMove := range rawMoves {
 		for _, versionMove := range completeMove.VersionGroupDetails {
-			if versionMove.VersionGroup.Name == gameVersion {
+			if versionMove.VersionGroup.Name == pI.game {
 				MoveName := completeMove.Move.Name
 
 				MoveName = pI.getSpanishMove(MoveName)

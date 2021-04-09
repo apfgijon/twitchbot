@@ -2,8 +2,8 @@ package pokemon
 
 type PokeInfo interface {
 	Build()
-	PokeMoves(pokemon string, gmaeVersion string) map[int]string
-	PokeMovesFormatted(pokemon string, gmaeVersion string) string
+	PokeMoves(pokemon string) map[int]string
+	PokeMovesFormatted(pokemon string) string
 	Types(pokemon string) string
 	TypeTable(typo string) string
 	TypeTableFrom(typo string) string
@@ -11,4 +11,5 @@ type PokeInfo interface {
 	CaptureRate(pokemon string) int
 	Stats(pokemon string) string
 	PokeEvos(pokemon string) string
+	PokeRandom() string
 }

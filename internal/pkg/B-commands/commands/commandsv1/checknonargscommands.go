@@ -6,9 +6,7 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/apfgijon/cartones/pkg/cartongen"
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/mtslzr/pokeapi-go"
 )
 
 func (this *Commandsv1) checkNonArgCommands(message twitch.PrivateMessage) string {
@@ -21,15 +19,9 @@ func (this *Commandsv1) checkNonArgCommands(message twitch.PrivateMessage) strin
 		ioutil.WriteFile("under.txt", []byte(fmt.Sprint(numI)), 0644)
 		return message
 	case "!carton":
-		carton := cartongen.GenerateCarton()
-		message := "Esti ye'l Bingu bot del mio canal, Equí ta'l to cartón " + message.User.DisplayName
-		message = message + carton
-		return message
+		return this.provider.GetBingoCartonResponse()
 	case "!pokemon":
-		l, _ := pokeapi.Resource("pokemon", 0, 386)
-		RandomPoke := l.Results[rand.Intn(len(l.Results))]
-		response := message.User.DisplayName + " tiene la personalidad de " + RandomPoke.Name
-		return response
+		return this.provider.GetPokemonRandomResponse(message.User.DisplayName)
 	case "!botella":
 		users, _ := this.users()
 		user := rand.Intn(len(users))

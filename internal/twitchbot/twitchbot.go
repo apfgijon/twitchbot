@@ -7,16 +7,18 @@ import (
 )
 
 type Twitchbot struct {
-	botName string
-	channel string
-	oauth   string
+	botName  string
+	channel  string
+	oauth    string
+	pokeGame string
 }
 
-func NewTwitchBot(botName string, channel string, oauth string) *Twitchbot {
+func NewTwitchBot(botName string, channel string, oauth string, pokeGame string) *Twitchbot {
 	return &Twitchbot{
-		botName: botName,
-		channel: channel,
-		oauth:   oauth,
+		botName:  botName,
+		channel:  channel,
+		oauth:    oauth,
+		pokeGame: pokeGame,
 	}
 }
 
@@ -28,7 +30,7 @@ func (t *Twitchbot) Bootstrap() {
 		BotName: t.botName,
 	}
 
-	generalbot, _ := services.InitializeBot(client)
+	generalbot, _ := services.InitializeBot(client, t.pokeGame)
 
 	generalbot.Start()
 

@@ -33,9 +33,9 @@ func (this *Commandsv1) checkStaticCommands(message twitch.PrivateMessage) strin
 			if len(messageComm) > 1 {
 				ran, err = strconv.Atoi(messageComm[1])
 				ran--
-
 			}
-			if err != nil || ran < 0 || ran >= len(v) {
+			if err != nil || ran < 0 || ran >= len(v) || len(messageComm) == 1 {
+
 				ran = rand.Intn(len(v))
 			}
 

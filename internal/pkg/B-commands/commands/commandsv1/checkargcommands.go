@@ -1,45 +1,34 @@
 package commands
 
 import (
-	"math/rand"
-
 	"github.com/apfgijon/cartones/internal/pkg/municipios"
 	"github.com/gempir/go-twitch-irc/v2"
-	"github.com/mtslzr/pokeapi-go"
 )
 
 func (this *Commandsv1) checkArgCommands(message twitch.PrivateMessage, com string, args string) string {
 	switch com {
 	case "!municipio":
-
 		resp := municipios.HablameSobre(args)
 		return resp
-	case "!pokemon":
-		l, _ := pokeapi.Resource("pokemon", 0, 386)
-		RandomPoke := l.Results[rand.Intn(len(l.Results))]
-		response := args + " tiene la personalidad de " + RandomPoke.Name
-		return response
 	case "!quever":
 		resp := municipios.QueVer(args)
 		return resp
+	case "!pokemon":
+		return this.provider.GetPokemonRandomResponse(args)
 	case "!ataques", "!moves":
-		return this.ataques(args, "heartgold-soulsilver")
+		return this.provider.GetPokemonAtacksResponse(args)
 	case "!tipo":
-		return this.tipos(args)
+		return this.provider.GetPokemonTypesResponse(args)
 	case "!evo":
-		return this.evolution(args)
+		return this.provider.GetPokemonEvolutionResponse(args)
 	case "!stats":
-		return this.stats(args)
-	case "!tiposatacar", "!tipoatacar", "!efectivo":
-		return this.tablatiposHacia(args)
-	case "!tiposrecibir", "!tiporecibir", "!resiste", "!weak":
-		return this.tablatiposDe(args)
+		return this.provider.GetPokemonStatsResponse(args)
 	case "!tablatipos":
-		return this.tablatipos(args)
+		return this.provider.GetPokemonTypeTableResponse(args)
 	case "!capture", "!captura", "!rate":
-		return this.captureRate(args)
+		return this.provider.GetPokemonCaptureRateResponse(args)
 	case "!covid":
-		return this.covidStats(message, args)
+		return this.provider.GetCovidStatsResponse(args, message.User.DisplayName)
 	case "!botella":
 		response := message.User.DisplayName + " tiró la botella y cayó en " + args
 		return response
