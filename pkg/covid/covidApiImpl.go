@@ -37,12 +37,12 @@ type CovidApiImpl struct {
 	apiUrl string
 }
 
-func NewCovidApi() CovidInfo {
-	return &CovidApiImpl{}
-}
+func NewCovidApi() (CovidInfo, error) {
+	cI := &CovidApiImpl{}
 
-func (cI *CovidApiImpl) Build() {
 	cI.apiUrl = "https://covid-api.com/api/reports?iso=ESP"
+
+	return cI, nil
 }
 
 func (cI *CovidApiImpl) getRawData() []byte {

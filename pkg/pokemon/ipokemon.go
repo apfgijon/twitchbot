@@ -1,7 +1,6 @@
 package pokemon
 
 type PokeInfo interface {
-	Build()
 	PokeMoves(pokemon string) map[int]string
 	PokeMovesFormatted(pokemon string) string
 	Types(pokemon string) string

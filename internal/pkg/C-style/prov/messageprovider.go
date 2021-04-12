@@ -1,9 +1,12 @@
 package prov
 
 import (
+	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 
+	"github.com/apfgijon/cartones/internal/pkg/D-filesystem/filesystem"
 	"github.com/apfgijon/cartones/pkg/cartongen"
 	"github.com/apfgijon/cartones/pkg/covid"
 	"github.com/apfgijon/cartones/pkg/pokemon"
@@ -15,19 +18,21 @@ type MessageProviderv1 struct {
 	poke  pokemon.PokeInfo
 	covid covid.CovidInfo
 	car   cartongen.Carton
+	fs    filesystem.FileProvider
 }
 
-func NewMessageProoviderv1(p pokemon.PokeInfo, cov covid.CovidInfo, c cartongen.Carton) MessageProvider {
-	return &MessageProviderv1{
+func NewMessageProoviderv1(p pokemon.PokeInfo, cov covid.CovidInfo, c cartongen.Carton, f filesystem.FileProvider) (MessageProvider, error) {
+	this := &MessageProviderv1{
 		poke:  p,
 		covid: cov,
 		car:   c,
+		fs:    f,
 	}
+	return this, nil
 }
 
 func (this *MessageProviderv1) Build() {
-	this.poke.Build()
-	this.covid.Build()
+
 }
 
 func (this *MessageProviderv1) GetBingoCartonResponse() string {
@@ -99,4 +104,15 @@ func (this *MessageProviderv1) GetCovidStatsResponse(site string, user string) s
 	}
 	formattedMessage := "Nun sei " + user + ", abondo que poño casos d'españa"
 	return formattedMessage
+}
+
+func (this *MessageProviderv1) GetUnderLevelResponse(command string) string {
+	return "El guiador dijo que está underlevel " + fmt.Sprint(this.fs.GetCounterCommand(command)) + " veces"
+}
+
+func (this *MessageProviderv1) GetBotellaResponse(getusers func() ([]string, error), u string) string {
+	users, _ := getusers()
+	user := rand.Intn(len(users))
+	response := u + " tiró la botella y cayó en " + users[user]
+	return response
 }

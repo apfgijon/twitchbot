@@ -18,15 +18,15 @@ type Generalbot struct {
 	commands commands.Commands
 }
 
-func NewGeneralBot(commands commands.Commands, comu client.Communication) Bot {
+func NewGeneralBot(commands commands.Commands, comu client.Communication) (Bot, error) {
 	return &Generalbot{
 		com:      comu,
 		commands: commands,
-	}
+	}, nil
 }
 
 func (this *Generalbot) Start() {
-	this.commands.Build(this.userList)
+	this.commands.SetUsersConnectedProvider(this.userList)
 
 	this.com.Client.OnPrivateMessage(this.onMessage)
 

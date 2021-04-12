@@ -15,14 +15,19 @@ type Commandsv1 struct {
 	users    func() ([]string, error)
 }
 
-func NewCommandImpl(p prov.MessageProvider) commands.Commands {
-	return &Commandsv1{
+func NewCommandImpl(p prov.MessageProvider) (commands.Commands, error) {
+	this := &Commandsv1{
 		provider: p,
 	}
+
+	this.users = func() ([]string, error) {
+		return []string{}, nil
+	}
+
+	return this, nil
 }
 
-func (this *Commandsv1) Build(u func() ([]string, error)) {
-	this.provider.Build()
+func (this *Commandsv1) SetUsersConnectedProvider(u func() ([]string, error)) {
 	this.users = u
 }
 

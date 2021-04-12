@@ -22,7 +22,7 @@ type PokeapiImpl struct {
 	game       string
 }
 
-func NewPokemonImpl(g string) PokeInfo {
+func NewPokemonImpl(g string) (PokeInfo, error) {
 	var gameSelected string
 	switch g {
 	case "HG":
@@ -31,17 +31,17 @@ func NewPokemonImpl(g string) PokeInfo {
 	default:
 		gameSelected = "heartgold-soulsilver"
 	}
-	return &PokeapiImpl{
+
+	pI := &PokeapiImpl{
 		game: gameSelected,
 	}
-}
-
-func (pI *PokeapiImpl) Build() {
 	pI.Movesfile = "SpanishMoves.json"
 	pI.TransMoves = make(map[string]string)
 	pI.Typesfile = "SpanishTypes.json"
 	pI.TransTypes = make(map[string]string)
 	pI.initMoves()
+
+	return pI, nil
 }
 
 func (pI *PokeapiImpl) initMoves() {

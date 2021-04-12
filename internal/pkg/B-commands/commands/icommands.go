@@ -4,5 +4,5 @@ import "github.com/gempir/go-twitch-irc/v2"
 
 type Commands interface {
 	CheckMessage(message twitch.PrivateMessage) string
-	Build(users func() ([]string, error))
+	SetUsersConnectedProvider(users func() ([]string, error))
 }

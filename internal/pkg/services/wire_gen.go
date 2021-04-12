@@ -10,6 +10,7 @@ import (
 	"github.com/apfgijon/cartones/internal/pkg/A-comunication/client"
 	"github.com/apfgijon/cartones/internal/pkg/B-commands/commands/commandsv1"
 	"github.com/apfgijon/cartones/internal/pkg/C-style/prov"
+	"github.com/apfgijon/cartones/internal/pkg/D-filesystem/filesystem"
 	"github.com/apfgijon/cartones/pkg/cartongen"
 	"github.com/apfgijon/cartones/pkg/covid"
 	"github.com/apfgijon/cartones/pkg/pokemon"
@@ -18,11 +19,27 @@ import (
 // Injectors from wire.go:
 
 func InitializeBot(c client.Communication, pokeGame string) (bot.Bot, error) {
-	pokeInfo := pokemon.NewPokemonImpl(pokeGame)
-	covidInfo := covid.NewCovidApi()
+	pokeInfo, err := pokemon.NewPokemonImpl(pokeGame)
+	if err != nil {
+		return nil, err
+	}
+	covidInfo, err := covid.NewCovidApi()
+	if err != nil {
+		return nil, err
+	}
 	carton := cartongen.NewCartonv1()
-	messageProvider := prov.NewMessageProoviderv1(pokeInfo, covidInfo, carton)
-	commandsCommands := commands.NewCommandImpl(messageProvider)
-	botBot := bot.NewGeneralBot(commandsCommands, c)
+	fileProvider := filesystem.NewFileProvider()
+	messageProvider, err := prov.NewMessageProoviderv1(pokeInfo, covidInfo, carton, fileProvider)
+	if err != nil {
+		return nil, err
+	}
+	commandsCommands, err := commands.NewCommandImpl(messageProvider)
+	if err != nil {
+		return nil, err
+	}
+	botBot, err := bot.NewGeneralBot(commandsCommands, c)
+	if err != nil {
+		return nil, err
+	}
 	return botBot, nil
 }
