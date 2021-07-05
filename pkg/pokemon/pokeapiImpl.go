@@ -22,9 +22,9 @@ type PokeapiImpl struct {
 	game       string
 }
 
-func NewPokemonImpl(g string) (PokeInfo, error) {
+func NewPokemonImpl(game string) (PokeInfo, error) {
 	var gameSelected string
-	switch g {
+	switch game {
 	case "HG":
 		gameSelected = "heartgold-soulsilver"
 		break
@@ -76,7 +76,11 @@ func (pI *PokeapiImpl) PokeMoves(pokeS string) map[int]string {
 }
 
 func (pI *PokeapiImpl) PokeMovesFormatted(pokeS string) string {
-	poke, _ := pI.checkIsAndRetPokemon(pokeS)
+	poke, err := pI.checkIsAndRetPokemon(pokeS)
+
+	if err != nil {
+		return ""
+	}
 
 	rawMoves := pI.getGameMoves(poke)
 
@@ -88,7 +92,12 @@ func (pI *PokeapiImpl) PokeMovesFormatted(pokeS string) string {
 }
 
 func (pI *PokeapiImpl) Types(pokeS string) string {
-	p, _ := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
+	p, err := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
+
+	if err != nil {
+		return ""
+	}
+
 	if p.Name == "" {
 		return ""
 	}
@@ -114,14 +123,31 @@ func (pI *PokeapiImpl) CaptureRate(pokeS string) int {
 }
 
 func (pI *PokeapiImpl) Stats(pokeS string) string {
-	p, _ := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
+	p, err := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
 
+	if err != nil {
+		return ""
+	}
 	stats := p.Name + ": "
 
 	for _, v := range p.Stats {
 		stats += v.Stat.Name + "=" + strconv.Itoa(v.BaseStat) + " | "
 
 	}
+	return stats
+}
+
+func (pI *PokeapiImpl) Peso(pokeS string) string {
+	p, err := pI.checkIsAndRetPokemon(strings.ToLower(pokeS))
+
+	if err != nil {
+		return ""
+	}
+	stats := p.Name + ": "
+
+	stats += "peso: " + strconv.FormatFloat(float64(p.Weight)*0.1, 'f', 1, 64) + " kg "
+	stats += "altura: " + strconv.Itoa(p.Height) + " m"
+
 	return stats
 }
 
@@ -365,6 +391,90 @@ func (pI *PokeapiImpl) TypeTable(typo string) string {
 	return ret
 }
 
+func (pI *PokeapiImpl) TypeTablePokemon(poke string) (int, map[string]int, map[string]int) {
+
+	esPokemon := 0
+
+	if poke == "" {
+		return esPokemon, nil, nil
+	}
+	pokemonT := pI.Types(poke)
+	pokemonT = strings.ReplaceAll(pokemonT, "á", "a")
+	pokemonT = strings.ReplaceAll(pokemonT, "ó", "o")
+	pokemonT = strings.ReplaceAll(pokemonT, "í", "i")
+	pokemonT = strings.ReplaceAll(pokemonT, "ú", "u")
+	pokemonT = strings.ReplaceAll(pokemonT, "é", "e")
+
+	var types []string
+	if pokemonT != "" {
+		types = strings.Split(pokemonT, " ")
+		esPokemon = 1
+	} else {
+		types = strings.Split(poke, " ")
+		if len(types) == 1 {
+			esPokemon = 2
+		} else {
+			esPokemon = 3
+		}
+	}
+
+	tablatiposFrom := make(map[string]int)
+	tablatiposTo := make(map[string]int)
+
+	for _, t := range types {
+		TypeS := pI.getEnglishType(t)
+		Type, _ := pokeapi.Type(TypeS)
+
+		if len(Type.DamageRelations.DoubleDamageFrom) > 0 {
+			for _, v := range Type.DamageRelations.DoubleDamageFrom {
+				tablatiposFrom[pI.getSpanishType(v.Name)]++
+			}
+		}
+
+		if len(Type.DamageRelations.HalfDamageFrom) > 0 {
+			for _, v := range Type.DamageRelations.HalfDamageFrom {
+				itemRaw, _ := json.Marshal(v)
+
+				var item Item
+
+				json.Unmarshal(itemRaw, &item)
+				tablatiposFrom[pI.getSpanishType(item.Name)]--
+			}
+		}
+
+		if len(Type.DamageRelations.NoDamageFrom) > 0 {
+			for _, v := range Type.DamageRelations.NoDamageFrom {
+				tablatiposFrom[pI.getSpanishType(v.Name)] = -100
+			}
+		}
+
+		if len(Type.DamageRelations.DoubleDamageTo) > 0 {
+			for _, v := range Type.DamageRelations.DoubleDamageTo {
+				itemRaw, _ := json.Marshal(v)
+
+				var item Item
+
+				json.Unmarshal(itemRaw, &item)
+				tablatiposTo[pI.getSpanishType(item.Name)]++
+			}
+		}
+
+		if len(Type.DamageRelations.HalfDamageTo) > 0 {
+			for _, v := range Type.DamageRelations.HalfDamageTo {
+				tablatiposTo[pI.getSpanishType(v.Name)]--
+			}
+		}
+
+		if len(Type.DamageRelations.NoDamageTo) > 0 {
+			for _, v := range Type.DamageRelations.NoDamageTo {
+				tablatiposTo[pI.getSpanishType(v.Name)] = -100
+			}
+		}
+	}
+
+	return esPokemon, tablatiposFrom, tablatiposTo
+}
+
 func (pI *PokeapiImpl) TypeTableFrom(typo string) string {
 
 	TypeS := pI.getEnglishType(typo)
@@ -488,8 +598,27 @@ func (pI *PokeapiImpl) getEnglishType(TypeName string) string {
 	return ret
 }
 
+func (pI *PokeapiImpl) getEnglishAttack(AtackName string) string {
+	ret := ""
+	for i, v := range pI.TransMoves {
+		if strings.ToLower(v) == strings.ToLower(AtackName) {
+			ret = i
+		}
+	}
+	return ret
+}
+
 func (pI *PokeapiImpl) checkIsAndRetPokemon(args string) (structs.Pokemon, error) {
 	p, err := pokeapi.Pokemon(args)
 
 	return p, err
+}
+
+func (pI *PokeapiImpl) PP(ataque string) int {
+	a := pI.getEnglishAttack(ataque)
+
+	m, _ := pokeapi.Move(a)
+
+	return m.Pp
+
 }

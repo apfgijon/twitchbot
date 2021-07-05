@@ -1,16 +1,18 @@
 package twitchbot
 
 import (
+	"github.com/apfgijon/cartones/internal/pkg/A-comunication/bot"
 	"github.com/apfgijon/cartones/internal/pkg/A-comunication/client"
 	"github.com/apfgijon/cartones/internal/pkg/services"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
 type Twitchbot struct {
-	botName  string
-	channel  string
-	oauth    string
-	pokeGame string
+	botName    string
+	channel    string
+	oauth      string
+	pokeGame   string
+	generalbot bot.Bot
 }
 
 func NewTwitchBot(botName string, channel string, oauth string, pokeGame string) *Twitchbot {
@@ -30,8 +32,11 @@ func (t *Twitchbot) Bootstrap() {
 		BotName: t.botName,
 	}
 
-	generalbot, _ := services.InitializeBot(client, t.pokeGame)
+	t.generalbot, _ = services.InitializeBot(client, t.pokeGame)
 
-	generalbot.Start()
+	t.generalbot.Start()
 
+}
+func (t *Twitchbot) Stop() {
+	t.generalbot.Stop()
 }

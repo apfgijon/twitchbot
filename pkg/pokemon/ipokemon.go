@@ -9,6 +9,9 @@ type PokeInfo interface {
 	TypeTableTo(typo string) string
 	CaptureRate(pokemon string) int
 	Stats(pokemon string) string
+	PP(ataque string) int
+	Peso(pokemon string) string
 	PokeEvos(pokemon string) string
 	PokeRandom() string
+	TypeTablePokemon(poke string) (int, map[string]int, map[string]int)
 }

@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/apfgijon/cartones/internal/pkg/A-comunication/client"
@@ -11,6 +12,7 @@ import (
 
 type Bot interface {
 	Start()
+	Stop()
 }
 
 type Generalbot struct {
@@ -35,12 +37,18 @@ func (this *Generalbot) Start() {
 	// go this.sayRandomRefran()
 	err := this.com.Client.Connect()
 	if err != nil {
-		panic(err)
+		fmt.Println("Desconectado")
 	}
+}
+func (this *Generalbot) Stop() {
+	this.com.Client.Disconnect()
 }
 
 func (this *Generalbot) onMessage(message twitch.PrivateMessage) {
-	go this.checkCommands(message)
+	if message.User.DisplayName != "duendrixx" {
+
+		go this.checkCommands(message)
+	}
 
 	if string(message.Message[0]) != "!" && string(message.Message[0]) != "@" && message.User.DisplayName != "Nightbot" && !strings.Contains(strings.ToLower(message.Message), "zonnyo") {
 		go randomsay.SetPhrase(message.Message)

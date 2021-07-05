@@ -11,6 +11,8 @@ type MessageProvider interface {
 	GetPokemonStatsResponse(poke string) string
 	GetPokemonTypeTableResponse(typ string) string
 	GetCovidStatsResponse(site string, user string) string
-	GetUnderLevelResponse(command string) string
 	GetBotellaResponse(getusers func() ([]string, error), u string) string
+	GetPokemTable(poke string) string
+	GetPokemonPesoResponse(poke string) string
+	GetPPResponse(a string) string
 }
