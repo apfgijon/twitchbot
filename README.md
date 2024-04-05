@@ -1,6 +1,6 @@
 # TwitchBot
 
-This is a bot for twitch that at this moment generate a random bingo cards
+This is a bot for developed for the channel https://twitch.tv/nullcalloc
 
 ## Usage
 
